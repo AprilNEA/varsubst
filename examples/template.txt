@@ -1,0 +1,26 @@
+======================================
+        Application Configuration
+======================================
+
+User Information:
+  Username: ${USER}
+  Home Directory: ${HOME}
+  Shell: ${SHELL}
+
+Application Settings:
+  Name: ${APP_NAME}
+  Version: ${APP_VERSION}
+  Environment: ${ENV}
+
+Database Configuration:
+  Host: ${DB_HOST}
+  Port: ${DB_PORT}
+  Database: ${DB_NAME}
+  User: ${DB_USER}
+
+Server Configuration:
+  Host: ${SERVER_HOST}
+  Port: ${SERVER_PORT}
+  Protocol: ${PROTOCOL}
+
+======================================

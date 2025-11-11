@@ -1,0 +1,32 @@
+[package]
+name = "varsubst"
+version = "0.1.0"
+edition = "2021"
+authors = ["AprilNEA"]
+description = "High-performance variable substitution library with single-pass parsing"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/AprilNEA/varsubst"
+keywords = ["envsubst", "template", "substitution", "environment"]
+categories = ["text-processing", "parsing"]
+
+[lib]
+name = "varsubst"
+path = "src/lib.rs"
+
+[[bin]]
+name = "varsubst"
+path = "src/main.rs"
+required-features = ["cli"]
+
+[features]
+default = ["escape"]
+# Support $X (short variable syntax without braces)
+short_syntax = []
+# Support escape sequences (\$, \{, \})
+escape = []
+# CLI binary (optional, includes clap for command-line interface)
+cli = ["dep:clap"]
+
+[dependencies]
+# Optional: only needed for CLI binary
+clap = { version = "4.5", features = ["derive"], optional = true }
