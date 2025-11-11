@@ -203,9 +203,28 @@ cargo build --no-default-features --features short_syntax
 
 ### Benchmark Results
 
+Run benchmarks:
 ```bash
-cargo bench
+cargo bench --bench substitution
 ```
+
+**Performance highlights** (on Apple Silicon):
+
+| Scenario | Time | Description |
+|----------|------|-------------|
+| Single variable | ~198 ns | `Hello ${VAR}!` |
+| Fast path (no vars) | **~29 ns** | Pure text, 7× faster |
+| 10 variables | ~450 ns | Linear scaling |
+| 100 variables | ~3.5 µs | Still blazing fast |
+| 1KB template | ~2.1 µs | ~476 MB/s throughput |
+| Real-world config | ~672 ns | 8 variables, 200 chars |
+
+**Key optimizations**:
+- ✅ Preprocessed lookup table: O(k·m) → O(k)
+- ✅ Fast path for plain text: ~7× speedup
+- ✅ Single-pass parsing: O(n) time complexity
+
+See [OPTIMIZATION_RESULTS.md](OPTIMIZATION_RESULTS.md) for detailed analysis.
 
 ## Variable Naming Rules
 

@@ -30,3 +30,10 @@ cli = ["dep:clap"]
 [dependencies]
 # Optional: only needed for CLI binary
 clap = { version = "4.5", features = ["derive"], optional = true }
+
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "substitution"
+harness = false

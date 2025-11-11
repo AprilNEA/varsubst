@@ -129,6 +129,24 @@ where
     K: AsRef<str> + std::hash::Hash + Eq,
     V: AsRef<str>,
 {
+    // Fast path: if no $ signs and no escape sequences needed, return as-is
+    #[cfg(feature = "escape")]
+    let needs_processing = template.contains('$') || template.contains('\\');
+
+    #[cfg(not(feature = "escape"))]
+    let needs_processing = template.contains('$');
+
+    if !needs_processing {
+        return Ok(template.to_string());
+    }
+
+    // Optimization: Build a fast lookup table
+    // This converts O(k·m) variable lookups into O(m + k)
+    let lookup: HashMap<&str, &str> = variables
+        .iter()
+        .map(|(k, v)| (k.as_ref(), v.as_ref()))
+        .collect();
+
     // Pre-allocate with template size as a reasonable starting point
     let mut output = String::with_capacity(template.len());
     let mut state = State::Normal;
@@ -209,9 +227,9 @@ where
                         });
                     }
 
-                    // Look up and substitute the variable
-                    if let Some(value) = variables.iter().find(|(k, _)| k.as_ref() == var_name.as_str()) {
-                        output.push_str(value.1.as_ref());
+                    // Look up and substitute the variable (O(1) with lookup table)
+                    if let Some(&value) = lookup.get(var_name.as_str()) {
+                        output.push_str(value);
                     } else {
                         // Variable not found, keep original syntax
                         output.push_str("${");
@@ -237,9 +255,9 @@ where
                 if is_var_char(ch) {
                     var_name.push(ch);
                 } else {
-                    // End of short variable name
-                    if let Some(value) = variables.iter().find(|(k, _)| k.as_ref() == var_name.as_str()) {
-                        output.push_str(value.1.as_ref());
+                    // End of short variable name (O(1) with lookup table)
+                    if let Some(&value) = lookup.get(var_name.as_str()) {
+                        output.push_str(value);
                     } else {
                         // Variable not found, keep original syntax
                         output.push('$');
@@ -294,9 +312,9 @@ where
 
         #[cfg(feature = "short_syntax")]
         State::ShortVar => {
-            // End of string in short var, substitute if found
-            if let Some(value) = variables.iter().find(|(k, _)| k.as_ref() == var_name.as_str()) {
-                output.push_str(value.1.as_ref());
+            // End of string in short var, substitute if found (O(1) with lookup table)
+            if let Some(&value) = lookup.get(var_name.as_str()) {
+                output.push_str(value);
             } else {
                 output.push('$');
                 output.push_str(&var_name);
